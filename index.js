@@ -1,3 +1,4 @@
+//Dependents
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 const consoleTable = require("console.table");
@@ -22,9 +23,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
   if (err) throw err;
-  // console.log("connected as id " + connection.threadId + "\n");
 
-  // Grab existing departments
   connection.query("SELECT name FROM department", function (err, res) {
     if (err) throw err;
 
@@ -33,7 +32,6 @@ connection.connect(function (err) {
     });
   });
 
-  // Grab existing roles
   connection.query("SELECT title FROM role", function (err, res) {
     if (err) throw err;
     res.forEach((role) => {
@@ -77,7 +75,6 @@ const start = () => {
       } else if (answer === "Add Role") {
         addRole();
       } else if (answer === "Update Employee Roles") {
-        // console.log("Updating Employee Roles...");
         updateEmployeeRole();
       } else if (answer === "Quit") {
         console.log("Quitting application...");
@@ -140,7 +137,6 @@ const addEmployee = () => {
                 ])
                 .then((response) => {
                   if (response.manager === "None") {
-                    // console.log("Insert employee with manager id NULL");
                     connection.query(
                       `INSERT INTO employee SET ?`,
                       {
@@ -152,18 +148,16 @@ const addEmployee = () => {
                       function (err) {
                         if (err) throw err;
                         console.log(
-                          `Successfully added ${newEmployeeFirstName} ${newEmployeeLastName}!`
+                          `Successfully added the new employee ${newEmployeeFirstName} ${newEmployeeLastName}!`
                         );
                         start();
                       }
                     );
                   } else {
-                    console.log(`Manager Selected: ${response.manager}`);
+                    console.log(`Their manager: ${response.manager}`);
 
                     newEmployeeCoWorkers.forEach((coWorker) => {
-                      // console.log(coWorker);
                       coWorkerName = `${coWorker.first_name} ${coWorker.last_name}`;
-                      // console.log(coWorkerName);
                       if (coWorkerName === response.manager) {
                         connection.query(
                           `INSERT INTO employee SET ?`,
