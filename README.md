@@ -4,7 +4,7 @@
 
 ### Screenshot of deployed app ![Screenshot](/assets/screenshot.JPG)
 
-### Demo of app ![Screenshot](/assets/demo.gif)
+### Demo of app <br/> ![Screenshot](/assets/demo.gif)
 
 ## Resources used:
 
