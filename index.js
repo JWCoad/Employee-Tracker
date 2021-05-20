@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
-const consleTable = require("console.table");
+const consoleTable = require("console.table");
 
 const departments = [];
 const roles = [];
@@ -264,6 +264,137 @@ const addDepartment = () => {
             `The new department "${department}" has been added to the database!`
           );
           departments.push(department);
+          start();
+        }
+      );
+    });
+};
+// updates an empoyee role
+const updateEmployeeRole = () => {
+  updateThisEmployee = "";
+
+  connection.query(
+    `SELECT first_name, last_name FROM employee`,
+    function (err, res) {
+      if (err) throw err;
+      console.log(res);
+      let employees = res.map((employee) => {
+        return `${employee.first_name} ${employee.last_name}`;
+      });
+      console.log(employees);
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            message: "Who's role would you like to update?",
+            name: "employee",
+            choices: employees,
+          },
+          {
+            type: "list",
+            message: "What role do you want to assign?",
+            name: "role",
+            choices: roles,
+          },
+        ])
+        .then((response) => {
+          updateThisEmployee = response.employee;
+          updateThisEmployee = updateThisEmployee.split(" ");
+          console.log(updateThisEmployee);
+
+          connection.query(
+            `SELECT id, title FROM role WHERE title = "${response.role}"`,
+            function (err, res) {
+              connection.query(
+                "UPDATE employee SET ? WHERE ? AND ?",
+                [
+                  {
+                    role_id: res[0].id,
+                  },
+                  {
+                    first_name: updateThisEmployee[0],
+                  },
+                  {
+                    last_name: updateThisEmployee[1],
+                  },
+                ],
+                function (err) {
+                  if (err) throw error;
+                  console.log(
+                    `Employee changed ${updateThisEmployee[0]} ${updateThisEmployee[1]} as a "${res[0].title}"`
+                  );
+                  start();
+                }
+              );
+            }
+          );
+        });
+    }
+  );
+};
+// Shows all employees in db in table!
+const viewAllEmployees = () => {
+  connection.query(
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary FROM ((department INNER JOIN role ON role.department_id = department.id) INNER JOIN employee ON employee.role_id = role.id);",
+    function (err, res) {
+      if (err) throw err;
+      const table = consoleTable.getTable(res);
+      console.log("\n");
+      console.log(table);
+
+      start();
+    }
+  );
+};
+
+// Show employess in a given department
+const viewByDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        message: "Choose a department to view their employees",
+        choices: departments,
+        name: "department",
+      },
+    ])
+    .then((response) => {
+      connection.query(
+        `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary
+            FROM ((department INNER JOIN role ON role.department_id = department.id) INNER JOIN employee ON employee.role_id = role.id) WHERE department.name = "${response.department}"`,
+        function (err, res) {
+          if (err) throw err;
+          const table = consoleTable.getTable(res);
+          console.log("\n");
+          console.log(table);
+
+          start();
+        }
+      );
+    });
+};
+// Show empployees in a role
+const viewByRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        message: "Choose a role to view their employees",
+        choices: roles,
+        name: "role",
+      },
+    ])
+    .then((response) => {
+      connection.query(
+        `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary
+            FROM ((department INNER JOIN role ON role.department_id = department.id) INNER JOIN employee ON employee.role_id = role.id) WHERE role.title = "${response.role}"`,
+        function (err, res) {
+          // console.log(res);
+          if (err) throw err;
+          const table = consoleTable.getTable(res);
+          console.log("\n");
+          console.log(table);
+
           start();
         }
       );
