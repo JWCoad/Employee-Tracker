@@ -241,3 +241,31 @@ const addRole = () => {
       );
     });
 };
+// Adds a new department
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the name of the department?",
+        name: "department",
+      },
+    ])
+    .then(({ department }) => {
+      // Runs a query to add new deparment user listed
+      connection.query(
+        "INSERT INTO department SET ?",
+        {
+          name: department,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log(
+            `The new department "${department}" has been added to the database!`
+          );
+          departments.push(department);
+          start();
+        }
+      );
+    });
+};
